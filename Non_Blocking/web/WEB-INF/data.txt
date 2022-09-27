@@ -1,0 +1,1790 @@
+Teacher’s Reference Manual 
+Subject: Enterprise Java 
+with effect from the academic year 
+2018 – 2019 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 2 
+Requirements: 
+1. JDK 8u181 
+2. Netbeans 8.1 or higher 
+3. MySql 5.5 or higner 
+1a. Create a simple calculator application using servlet. 
+Create a new project 
+Select java web → web Application 
+index.html 
+<html><head><title>Calculator App</title></head><body> 
+<form action="CalculatorServlet" > 
+ Enter First Number <input type="text" name="txtN1" ><br> 
+ Enter Second Number <input type="text" name="txtN2" ><br> 
+ Select an Operation 
+<input type="radio" name="opr" value="+">ADDTION 
+<input type="radio" name="opr" value="-">SUBSTRACTION 
+<input type="radio" name="opr" value="*">MULTIPLY 
+<input type="radio" name="opr" value="/">DIVIDE <br> 
+<input type="reset"> 
+<input type="submit" value="Calculate" > 
+</form></body></html> 
+Add a new Servlet to source package 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 3 
+Name the servlet and package 
+Check “Add information to deployment descriptor” to add servlet into web.xml 
+But preferably use annotation. 
+CalculatorServlet.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+public class CalculatorServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Servlet CalculatorServlet</title></head><body>"); 
+double n1 = Double.parseDouble(request.getParameter("txtN1")); 
+ double n2 = Double.parseDouble(request.getParameter("txtN2")); 
+ double result =0; 
+ String opr=request.getParameter("opr"); 
+ if(opr.equals("+")) result=n1+n2; if(opr.equals("-")) result=n1-n2; 
+ if(opr.equals("*")) result=n1*n2; if(opr.equals("/")) result=n1/n2; 
+ out.println("<h1> Result = "+result); out.println("</body></html>");} } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 4 
+1b. Create a servlet for a login page. If the username and password are correct then it says message 
+“Hello < username>” else a message “login failed”
+index.html 
+<html><head><title>Login Form</title></head> 
+<form action="LoginServlet" > 
+ Enter User ID<input type="text" name="txtId"><br> 
+ Enter Password<input type="password" name="txtPass"><br> 
+<input type="reset"><input type="submit" value=" Click to Login " ></form></html> 
+LoginServlet.java 
+package mypack; 
+import java.io.*; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.*; 
+public class LoginServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Servlet LoginServlet</title></head>"); 
+ String uname = request.getParameter("txtId"); 
+ String upass = request.getParameter("txtPass"); 
+ if(uname.equals("admin") && upass.equals("12345")){ 
+ out.println("<body bgcolor=blue >"); 
+ out.println("<h1> Welcome !!! "+uname+"</h1>"); 
+ } 
+ else{ 
+ out.println("<body bgcolor=red >");out.println("<h1> Login Fail !!! </h1>"); 
+ } 
+ out.println("</body></html>");}} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 5 
+1c. Create a registration servlet in Java using JDBC. Accept the details such as Username, Password, 
+Email, and Country from the user using HTML Form and store the registration details in the database. 
+MySql queries 
+create database LoginDB; 
+use LoginDB; 
+create table user(username varchar(20) PRIMARY KEY, password varchar(20), email varchar(20), 
+country varchar(20)); 
+insert into user values ('admin','admin','admin@admin.com','India'); 
+select * from user; 
+• Add jar file → <<Netbean Folder>>\ide\modules\ext\mysql-connector-java-5.1.23-bin.jar 
+index.html 
+<html><head><title>Registration Page</title></head> 
+<body> 
+<form action="RegisterServlet" > 
+<H1>Welcome to Registration page</H1> 
+ Enter User Name <input type="text" name="txtUid"><br> 
+ Enter Password <input type="password" name="txtPass"><br> 
+ Enter Email <input type="text" name="txtEmail" ><br> 
+ Enter Country <input type="text" name="txtCon" ><br> 
+<input type="reset" ><input type="submit" value="REGISTER" > 
+</form> 
+</body> 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 6 
+</html> 
+RegisterServlet.java 
+package mypack; 
+import java.io.*; 
+import java.sql.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class RegisterServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ String id = request.getParameter("txtUid"); 
+ String ps = request.getParameter("txtPass"); 
+ String em = request.getParameter("txtEmail"); 
+ String co = request.getParameter("txtCon"); 
+ try{ 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con =DriverManager.getConnection("jdbc:mysql://localhost:3306/logindb"); 
+ PreparedStatement pst = con.prepareStatement("insert into user values(?,?,?,?)"); 
+ pst.setString(1,id); 
+ pst.setString(2,ps); 
+ pst.setString(3,em); 
+ pst.setString(4,co); 
+ int row = pst.executeUpdate(); 
+ out.println("<h1>"+row+ " Inserted Succesfullyyyyy"); 
+ }catch(Exception e){out.println(e);} 
+} 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 7 
+2a. Using Request Dispatcher Interface create a Servlet which will validate the password entered by 
+the user, if the user has entered "Servlet" as password, then he will be forwarded to Welcome Servlet 
+else the user will stay on the index.html page and an error message will be displayed. 
+index.html 
+<html><head><title>Login Form</title></head> 
+<form action="LoginServlet" > 
+ Enter User ID<input type="text" name="txtId"><br> 
+ Enter Password<input type="password" name="txtPass"><br> 
+<input type="reset"> 
+<input type="submit" value=" Click to Login " > 
+</form> 
+</html> 
+LoginServlet.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+import javax.servlet.RequestDispatcher; 
+public class LoginServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head>"); 
+ out.println("<title>Servlet LoginServlet</title></head>"); 
+ String uname = request.getParameter("txtId"); 
+ String upass = request.getParameter("txtPass"); 
+ if(uname.equals("admin") && upass.equals("servlet")){ 
+ RequestDispatcher rd = request.getRequestDispatcher("WelcomeServlet"); 
+ rd.forward(request, response); 
+ } 
+ else{ 
+ out.println("<body bgcolor=red >"); 
+ out.println("<h1> Login Fail !!! </h1>"); 
+ RequestDispatcher rd = request.getRequestDispatcher("index.html"); 
+ rd.include(request, response); 
+ } 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 8 
+ } 
+WelcomeServlet.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+import javax.servlet.RequestDispatcher; 
+public class LoginServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head>"); 
+ out.println("<title>Servlet LoginServlet</title></head>"); 
+ String uname = request.getParameter("txtId"); 
+ String upass = request.getParameter("txtPass"); 
+ if(uname.equals("admin") && upass.equals("servlet")){ 
+ RequestDispatcher rd = request.getRequestDispatcher("WelcomeServlet"); 
+ rd.forward(request, response); 
+ } 
+ else{ 
+ out.println("<body bgcolor=red >"); 
+ out.println("<h1> Login Fail !!! </h1>"); 
+ RequestDispatcher rd = request.getRequestDispatcher("index.html"); 
+ rd.include(request, response); 
+ } 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 9 
+2b. Create a servlet that uses Cookies to store the number of times a user has visited servlet.
+index.html 
+<html> 
+<head><title>Cookie Demo</title></head> 
+<body> 
+<form action="Page1" > 
+ Enter Your Name <input type="text" name="txtName"><br> 
+<input type="submit" value="~~~ Click to Enter ~~~"> 
+</form> 
+</body> 
+</html> 
+Page1.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+import javax.servlet.http.Cookie; 
+public class Page1 extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Page1</title></head>"); 
+ out.println("<body bgcolor=pink >"); 
+ String uname = request.getParameter("txtName"); 
+ out.println("<h1>~~~ Welcome "+uname+"</h1>"); 
+ Cookie ck1 = new Cookie("username", uname); 
+ Cookie ck2 = new Cookie("visit","1"); 
+ response.addCookie(ck1); response.addCookie(ck2); 
+ out.println("<h1><a href=Page2 >Click to visit Page 2 </a></h1>"); 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } 
+ } 
+Page2.java 
+package mypack; 
+import java.io.*; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.*; 
+public class Page2 extends HttpServlet { 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 10 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Page2</title></head>"); 
+ out.println("<body bgcolor=yellow >"); 
+ Cookie [] ck = request.getCookies(); 
+ for(int i=0;i<ck.length;i++){ 
+ if(ck[i].getName().equals("visit")){ 
+ int count = Integer.parseInt(ck[i].getValue())+1; 
+ out.println("<h1>Visit No : "+count+"</h1>"); 
+ ck[i] = new Cookie("visit",count+""); 
+ response.addCookie(ck[i]); 
+ } 
+else { 
+ out.println(ck[i].getName()+ " = "+ck[i].getValue()); } 
+ out.println("<h1><a href=Page3 >Click to visit Page 3 </a></h1>"); 
+ out.println("<h1><a href=Page4 >Click to visit Page 4 </a></h1>"); 
+ out.println("<h1><a href=Page5 >Click to visit Page 5 </a></h1>"); 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } } 
+Repeat the code from Page2.java for Page3.java, Page4.java and Page5.java with relevant 
+changes. 
+Important Note: - Run this program on one machine as server and student’s machine as client 
+using proxy setting to demonstrate tracking of individual visitor’s activity by server using cookie 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 11 
+2c. Create a servlet demonstrating the use of session creation and destruction. Also check whether the 
+user has visited this page first time or has visited earlier also using sessions. 
+index.html 
+<html> 
+<head><title>Session Demo</title></head> 
+<form action="Page1" method="get" > 
+ Enter User ID <input type="text" name="txtName"><br> 
+<input type="reset" ><input type="submit" > 
+</form> 
+</html> 
+Page1.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+import javax.servlet.http.HttpSession; 
+public class Page1 extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Servlet Page1</title></head>"); 
+ HttpSession hs = request.getSession(true); 
+ if(hs.isNew()){ 
+ out.println("<body bgcolor=yellow>"); 
+ String name = request.getParameter("txtName"); 
+ hs.setAttribute("uname", name); 
+ hs.setAttribute("visit", "1"); 
+ out.println("<h1>Welcome First Time</h1>"); 
+ } 
+ else{ 
+ out.println("<h1>Welcome Again</h1>"); 
+ int visit = Integer.parseInt((String)hs.getAttribute("visit"))+1; 
+ out.println("<h1>You Visited "+visit+"Times</h1>"); 
+ hs.setAttribute("visit", ""+visit); 
+ } 
+ out.println("<h1>Your Session ID "+hs.getId()+"</h1>"); 
+ out.println("<h1>You Logged in at "+new java.util.Date(hs.getCreationTime())+"</h1>"); 
+ out.println("<h1><a href=Page2>Click for Page 2 </a></h1>"); 
+ out.println("<h1><a href=Page3>Click for Page 3 </a></h1>"); 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 12 
+ out.println("<h1><a href=Page4>Click for Page 4 </a></h1>"); 
+ out.println("<h1><a href=LogoutServlet>Click to Terminate Session </a></h1>"); 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } 
+ } 
+Page2.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+import javax.servlet.http.HttpSession; 
+public class Page2 extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Servlet Page2</title></head>"); 
+ HttpSession hs = request.getSession(false); 
+ out.println("<h1>Welcome Again on Page No. 2</h1>"); 
+ int visit = Integer.parseInt((String)hs.getAttribute("visit"))+1; 
+ out.println("<h1>You Visited "+visit+"Times</h1>"); 
+ hs.setAttribute("visit", ""+visit); 
+ out.println("<h1>Your Session ID "+hs.getId()+"</h1>"); 
+ out.println("<h1>You Logged in at "+new java.util.Date(hs.getCreationTime())+"</h1>"); 
+ out.println("<h1><a href=Page1>Click for Page 1 </a></h1>"); 
+ out.println("<h1><a href=Page3>Click for Page 3 </a></h1>"); 
+ out.println("<h1><a href=Page4>Click for Page 4 </a></h1>"); 
+ out.println("<h1><a href=LogoutServlet>Click for Terminate Session </a></h1>"); 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } 
+ } 
+Repeat the code from Page2.java in Page3.java and Page4.java with relevant changes. 
+LogoutServlet.java 
+package mypack; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletException; 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 13 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+public class LogoutServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ out.println("<html><head><title>Servlet LogoutServlet</title></head>"); 
+ out.println("<body>"); 
+ javax.servlet.http.HttpSession hs = request.getSession(); 
+ if(hs != null) hs.invalidate(); 
+ out.println("<h1>You are Logged out now........</h1>"); 
+ out.println("</body>"); 
+ out.println("</html>"); 
+ } 
+ } 
+Important Note: - Run this program on one machine as server and student’s machine as client 
+using proxy setting to demonstrate tracking of individual visitor’s activity by server. 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 14 
+3a. Create a Servlet application to upload and download a file. 
+~~~~~~~~~~~~~~~~~~~ index.html ~~~~~~~~~~~~~~~~~~~~~~ 
+<html> 
+ <body> 
+ <form action="FileUploadServlet" method="post" enctype="multipart/form-data"> 
+ Select File to Upload:<input type="file" name="file" id="file"> 
+ Destination <input type="text" value="/tmp" name="destination"> 
+ <br> 
+ <input type="submit" value="Upload file" name="upload" id="upload"> 
+ </form> 
+ </body> 
+</html> 
+~~~~~ FileUploadServlet.java ~~~~~~~ 
+package fileservletapp; 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.annotation.MultipartConfig; 
+import javax.servlet.http.*; 
+@MultipartConfig 
+public class FileUploadServlet extends HttpServlet { 
+public void doPost(HttpServletRequest req,HttpServletResponse res) throws ServletException, 
+IOException 
+{ 
+ res.setContentType("text/html"); 
+ PrintWriter out = res.getWriter(); 
+ String path=req.getParameter("destination"); 
+ Part filePart=req.getPart("file"); 
+ String filename=filePart.getSubmittedFileName().toString(); 
+ out.print("<br><br><hr> file name: "+filename); 
+ OutputStream os=null; 
+ InputStream is=null; 
+try { 
+ os=new FileOutputStream(new File(path+File.separator+filename)); 
+ is=filePart.getInputStream(); 
+ int read=0; 
+ 
+ while ((read = is.read()) != -1) { 
+ os.write(read); 
+ } 
+ out.println("<br>file uploaded sucessfully...!!!"); 
+ } 
+ catch(FileNotFoundException e){out.print(e);} 
+} } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 15 
+~~~~~ index.html ~~~~~~ 
+<html> 
+ <head> 
+ <title>File Download Page</title> 
+ </head> 
+ <body> 
+ <h1>File Download Application</h1> 
+ Click <a href="DownloadServlet?filename=SampleChapter.pdf">Sample Chapter</a> 
+ <br/><br/> 
+ Click <a href="DownloadServlet?filename=TOC.pdf">Table Of Contents</a> 
+ </body> 
+</html> 
+~~~~~ DownloadServlet.java ~~~~~~ 
+package filedownloadapp; 
+import java.io.IOException; 
+import java.io.InputStream; 
+import java.io.PrintWriter; 
+import javax.servlet.ServletContext; 
+import javax.servlet.ServletException; 
+import javax.servlet.ServletOutputStream; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+public class DownloadServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 16 
+throws ServletException, IOException { 
+ response.setContentType("APPLICATION/OCTET-STREAM"); 
+ String filename = request.getParameter("filename"); 
+ ServletContext context = getServletContext(); 
+InputStream is = context.getResourceAsStream("/" + filename); 
+ //ServletOutputStream out = response.getOutputStream(); // any of the two works 
+ PrintWriter out=response.getWriter(); 
+ response.setHeader("Content-Disposition","attachment; filename=\"" + filename + "\""); // 
+if comment this statement then it wl ask you about the editor with which you want to open the file 
+ 
+ int i; 
+ 
+ while ((i=is.read()) != -1) { 
+ out.write(i); 
+ } 
+ is.close(); 
+ out.close(); 
+} 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 17 
+3b. Develop Simple Servlet Question Answer Application using Database. 
+create database qadb; 
+use qabd; 
+create table quiz (qno varchar(5) PRIMARY KEY,question varchar(100), op1 varchar(50), op2 
+varchar(50), op3 varchar(50), op4 varchar(50), ans varchar(50)) 
+insert into quiz values('001','What is the capital of India??','New 
+Delhi','Kolkata','Chennai','Mumbai','New Delhi'); 
+insert into quiz values('002','Who was the First President of India??','Dr. Rajendra Prasad','Dr. S. 
+Radhakrishnan','Ram Nath Kovind','V. V. Giri','Dr. Rajendra Prasad'); 
+insert into quiz values('003','What is ORM','Object Ratio Mean','Object Rotation Measure','Object 
+Relation Mapping','Oracle Request Management','Object Relation Mapping'); 
+insert into quiz values('004','Unit of Energy is ___','Dozon','Kilo Meter ','Joul','Hertz','Joul') 
+insert into quiz values('005',' --- is the smallest memory unit.','bit','byte','Kilo Byte','Giga Byte','bit')
+index.html 
+<html><head><title>Quiz Application</title></head> 
+<body> 
+<h1>Welcome to Quiz Servlet </h1> 
+<h1><a href="QuizServlet" >CLICK TO START QUIZ</a></h1> 
+</body> 
+</html> 
+QuizServlet.java 
+package mypack; 
+import java.io.*; 
+import java.sql.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class QuizServlet extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+out.println("<form action=ShowResult >"); 
+ try { 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con = 
+DriverManager.getConnection("jdbc:mysql://localhost:3306/qadb","root","root"); 
+Statement stmt = con.createStatement(); 
+ResultSet res = stmt.executeQuery("select * from quiz"); 
+out.println("<table border=1 >"); 
+int qno=0; 
+while(res.next()){ 
+ qno++; 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 18 
+out.println("<tr><td>"+res.getString(1)+"</td>"); 
+out.println("<td>"+res.getString(2)+"</td></tr>"); 
+out.println("<tr><td><input type=radio name="+qno+" 
+value="+res.getString(3)+"></td><td>"+res.getString(3)+"</td></tr>"); 
+out.println("<tr><td><input type=radio name="+qno+" 
+value="+res.getString(4)+"></td><td>"+res.getString(4)+"</td></tr>"); 
+out.println("<tr><td><input type=radio name="+qno+" 
+value="+res.getString(5)+"></td><td>"+res.getString(5)+"</td></tr>"); 
+out.println("<tr><td><input type=radio name="+qno+" 
+value="+res.getString(6)+"></td><td>"+res.getString(6)+"</td></tr>"); 
+} 
+ }catch(Exception e){out.println(e);} 
+out.println("</table>"); 
+out.println("<input type=reset >"); 
+ out.println("<input type=submit value=SUBMIT >"); 
+ out.println("</form>"); } } 
+---------------------------------------------- ShowResult.java-------------------------------- 
+package mypack; 
+import java.io.*; 
+import java.sql.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class ShowResult extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ PrintWriter out = response.getWriter(); 
+ try { 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/qadb","root","root"); 
+Statement stmt = con.createStatement(); 
+ResultSet res = stmt.executeQuery("select ans from quiz"); 
+int count =0, qno=0; 
+while(res.next()){ 
+ if(res.getString(1).equals(request.getParameter(""+(++qno)))) 
+ { count++; 
+ out.println("<h1>Correct </h1>"); 
+ } 
+ else { 
+ out.println("<h1>Incorrect </h1>"); 
+ } 
+} 
+out.println("<h1>Your Score is "+count+" </h1>"); 
+ }catch(Exception e){out.println(e);}}} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 19 
+QuizServlet ShowResult
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 20 
+3c. Create simple Servlet application to demonstrate Non-Blocking Read Operation. 
+<html> 
+<head> 
+<title>Non Blocking IO</title> 
+<meta charset="UTF-8"> 
+<meta http-equiv="Refresh" content="0; URL=NonBlockingServlet"> 
+</head> 
+<body> 
+</body> 
+</html> 
+----------------------------------------------- NonBlockingServlrt.java --------------------- 
+package nonblkapp; 
+import java.io.*; 
+import java.net.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class NonBlockingServlet extends HttpServlet { 
+ protected void service(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ try (PrintWriter out = response.getWriter()) { 
+ 
+ out.println("<h1>FileReader</h1>"); 
+ String filename="/WEB-INF/booklist.txt"; 
+ ServletContext c=getServletContext(); 
+ InputStream in=c.getResourceAsStream(filename); 
+ String 
+path="http://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/Rea
+dingNonBloclingServlet"; 
+ URL url=new URL(path); 
+ HttpURLConnection conn=(HttpURLConnection)url.openConnection(); 
+ conn.setChunkedStreamingMode(2); 
+ conn.setDoOutput(true); 
+ conn.connect(); 
+ if(in!=null) 
+ { 
+ InputStreamReader inr=new InputStreamReader(in); 
+ BufferedReader br = new BufferedReader(inr); 
+ String text=""; 
+ System.out.println("Reading started...."); 
+ BufferedWriter bw=new BufferedWriter(new 
+OutputStreamWriter(conn.getOutputStream())); 
+ while((text=br.readLine())!=null){ 
+ out.print(text+"<br>"); 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 21 
+ try{ 
+ Thread.sleep(1000); 
+ out.flush(); 
+ } 
+ catch(InterruptedException ex){} 
+}out.print("reading completed...."); 
+ bw.flush(); 
+ bw.close(); 
+ } 
+ } 
+ } 
+} 
+------------------------------------- ReadingListener.java ----------------------------- 
+package nonblkapp; 
+import java.io.IOException; 
+import java.util.logging.Level; 
+import java.util.logging.Logger; 
+import javax.servlet.AsyncContext; 
+import javax.servlet.ReadListener; 
+import javax.servlet.ServletInputStream; 
+public class ReadingListener implements ReadListener 
+{ 
+ private ServletInputStream input = null; 
+ private AsyncContext ac = null; 
+ ReadingListener(ServletInputStream in, AsyncContext c) { 
+ input = in; 
+ ac = c; 
+ } 
+ @Override 
+ public void onDataAvailable() throws IOException { 
+ } 
+ public void onAllDataRead() throws IOException { 
+ ac.complete(); 
+ } 
+ public void onError(final Throwable t) { 
+ ac.complete(); 
+ t.printStackTrace(); 
+ } 
+} 
+---------------------------------- ReadingNonBlockingServlet.java -------------------------------- 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 22 
+package nonblkapp; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+import javax.servlet.AsyncContext; 
+import javax.servlet.ServletException; 
+import javax.servlet.ServletInputStream; 
+import javax.servlet.annotation.WebServlet; 
+import javax.servlet.http.HttpServlet; 
+import javax.servlet.http.HttpServletRequest; 
+import javax.servlet.http.HttpServletResponse; 
+/** 
+* 
+* @author Beena 
+*/ 
+@WebServlet (name = "ReadingNonBlockingServlet", urlPatterns = 
+{"/ReadingNonBlockingServlet"},asyncSupported = true ) 
+public class ReadingNonBlockingServlet extends HttpServlet { 
+@Override 
+ protected void service(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html"); 
+ AsyncContext ac = request.startAsync(); 
+ ServletInputStream in=request.getInputStream(); 
+ in.setReadListener(new ReadingListener(in,ac)); 
+ } 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 23 
+4a. Develop a simple JSP application to display values obtained from the use of intrinsic objects of 
+various types. 
+<%@page contentType="text/html" pageEncoding="UTF-8"%> 
+<html><head><title>JSP Page</title></head> 
+<body> 
+<h1>Use of Intrinsic Objects in JSP</h1> 
+<h1>Request Object </h1> 
+ Query String <%=request.getQueryString() %><br> 
+ Context Path <%=request.getContextPath() %><br> 
+ Remote Host <%=request.getRemoteHost() %><br> 
+<h1>Response Object </h1> 
+ Character Encoding Type <%=response.getCharacterEncoding() %><br> 
+ Content Type <%=response.getContentType() %><br> 
+ Locale <%=response.getLocale() %><br> 
+<h1>Session Object </h1> 
+ ID <%=session.getId() %><br> 
+ Creation Time <%=new java.util.Date(session.getCreationTime()) %><br> 
+ Last Access Time<%=new java.util.Date(session.getLastAccessedTime()) %><br> 
+</body> 
+</html> 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 24 
+4b. Develop a simple JSP application to pass values from one page to another with validations. 
+(Name-txt, age-txt, hobbies-checkbox, email-txt, gender-radio button). 
+index.html 
+<html><head><title>User Information Paage</title> 
+</head> 
+<body> 
+<form action="Validate.jsp"> 
+ Enter Your Name<input type="text" name="name" ><br> 
+ Enter Your Age<input type="text" name="age" ><br> 
+ Select Hobbies 
+<input type="checkbox" name="hob" value="Singing">Singing 
+<input type="checkbox" name="hob" value="Reading">Reading Books 
+<input type="checkbox" name="hob" value="Football">Playing Football<br> 
+ Enter E-mail<input type="text" name="email" ><br> 
+ Select Gender 
+<input type="radio" name="gender" value="male">Male 
+<input type="radio" name="gender" value="female">Female 
+<input type="radio" name="gender" value="other">Other<br> 
+<input type="hidden" name="error" value=""> 
+<input type="submit" value="Submit Form"> 
+</form> 
+</body> 
+</html> 
+------------------------------------------ Validate.jsp---------------------------------------------------- 
+<%@page contentType="text/html" pageEncoding="UTF-8" import="mypack.*" %> 
+<html><head><title>JSP Page</title></head> 
+<body> 
+<h1>Validation Page</h1> 
+<jsp:useBean id="obj" scope="request" 
+ class="mypack.CheckerBean" > 
+<jsp:setProperty name="obj" property="*"/> 
+</jsp:useBean> 
+<%if (obj.validate()) 
+{ %> 
+<jsp:forward page="successful.jsp"/> 
+<% } 
+else {%> 
+<jsp:include page="index.html"/> 
+<%}%> 
+<%=obj.getError() %> 
+</body></html> 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 25 
+----------------------------------------CheckerBean.java------------------------------------------- 
+package mypack; 
+public class CheckerBean { 
+private String name, age, hob, email, gender, error; 
+public CheckerBean(){error="";} 
+public void setName(String n){name=n;} 
+public void setAge(String a){age=a;} 
+public void setHob(String h){hob=h;} 
+public void setEmail(String e){email=e;} 
+public void setGender(String g){gender=g;} 
+public void setError(String e){error=e;} 
+public String getName(){return name;} 
+public String getAge(){return age;} 
+public String getHob(){return hob;} 
+public String getEmail(){return email;} 
+public String getGender(){return gender;} 
+public String getError(){return error;} 
+public boolean validate(){ 
+boolean res=true; 
+if(name.trim().equals("")) {error+="<br>Enter First Name";res=false;} 
+if(age.length() > 2 ) 
+{error+="<br>Age Invalid";res=false;} 
+return res; 
+} 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 26 
+4c. Create a registration and login JSP application to register and authenticate the user based on 
+username and password using JDBC. 
+--------------------------------------Register.html-------------------------------------- 
+<html><head><title>New User Registration Page</title></head> 
+<body> 
+<form action="Register.jsp" > 
+<h1> New User Registration Page</h1> 
+ Enter User Name <input type="text" name="txtName" ><br> 
+ Enter Password <input type="password" name="txtPass1" ><br> 
+ Re-Enter Password<input type="password" name="txtPass2" ><br> 
+ Enter Email<input type="text" name="txtEmail" ><br> 
+ Enter Country Name <input type="text" name="txtCon" ><br> 
+<input type="reset" ><input type="submit" value="REGISTER" > 
+</form> 
+</body> 
+</html> 
+----------------------------------------Register.jsp------------------------------------------- 
+<%@page contentType="text/html" import="java.sql.*"%> 
+<html><body> 
+<h1>Registration JSP Page</h1> 
+<% 
+ String uname=request.getParameter("txtName"); 
+ String pass1 = request.getParameter("txtPass1"); 
+ String pass2 = request.getParameter("txtPass2"); 
+ String email = request.getParameter("txtEmail"); 
+ String ctry = request.getParameter("txtCon"); 
+ if(pass1.equals(pass2)){ 
+ try{ 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/logindb"); 
+ PreparedStatement stmt = con.prepareStatement("insert into user values (?,?,?,?)"); 
+ stmt.setString(1, uname); stmt.setString(2, pass1); 
+ stmt.setString(3, email); stmt.setString(4, ctry); 
+ int row = stmt.executeUpdate(); 
+ if(row==1) { out.println("Registration Successful"); } 
+ else { 
+ out.println("Registration FFFFFAAAIIILLLL !!!!"); 
+ %><jsp:include page="Register.html" ></jsp:include> 
+<% 
+ } 
+ }catch(Exception e){out.println(e);} 
+ } 
+ else 
+ { 
+ out.println("<h1>Password Mismatch</h1>"); 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 27 
+ %> 
+<jsp:include page="Register.html" ></jsp:include> 
+<% } 
+ %> 
+</body> 
+</html> 
+------------------- Login.html ----------------------------------- 
+<html> 
+<body> 
+<h1>Login Page</h1> 
+<form action="Login.jsp" > 
+ Enter User Name <input type="text" name="txtName" ><br> 
+ Enter Password <input type="password" name="txtPass" ><br> 
+<input type="reset" ><input type="submit" value="~~~LOGIN~~" > 
+</form> 
+</body> 
+</html> 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 28 
+------------------- Login.jsp---------------------------------- 
+<%@page contentType="text/html" import="java.sql.*"%> 
+<html><body> 
+<h1>Registration JSP Page</h1> 
+<% 
+ String uname=request.getParameter("txtName"); 
+ String pass = request.getParameter("txtPass"); 
+ try{ 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/logindb"); 
+ PreparedStatement stmt = con.prepareStatement("select password from user where username=?"); 
+ stmt.setString(1, uname); 
+ ResultSet rs = stmt.executeQuery(); 
+ if(rs.next()){ 
+ if(pass.equals(rs.getString(1))) 
+ { 
+ out.println("<h1>~~~ LOGIN SUCCESSFULLL ~~~ </h1>"); 
+ } 
+ } 
+ else{ 
+ out.println("<h1>User Name not exist !!!!!</h1>"); 
+ %> 
+<jsp:include page="Register.html" ></jsp:include> 
+<% 
+ } 
+ }catch(Exception e){out.println(e);} 
+ %> 
+</body></html>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 29 
+5a. Create an html page with fields, eno, name, age, desg, salary. Now on submit this data to a JSP 
+page which will update the employee table of database with matching eno. 
+create table emp(empid varchar(10) PRIMARY KEY, ename varchar(50), salary varchar(50),age 
+varchar(50) ) 
+insert into emp values('1','aaa','221234','11') 
+insert into emp values('2','bbb','334567','22') 
+insert into emp values('3','ccc','44454','33') 
+insert into emp values('4','ddd','55123','44') 
+---- index.html --------- 
+<html> 
+<body> 
+<form action="UpdateEmp.jsp" > 
+ Enter Employee Number<input type="text" name="txtEno" ><br> 
+ Enter Name<input type="text" name="txtName" ><br> 
+ Enter age<input type="text" name="txtAge" ><br> 
+ Enter Salary<input type="text" name="txtSal" ><br> 
+<input type="reset" ><input type="submit"> 
+</form> 
+</body> 
+</html> 
+------------------- UpdateEmp.java -------------------------------- 
+<%@page contentType="text/html" import="java.sql.*" %> 
+<html><body> 
+<h1>Employee Record Update</h1> 
+<% 
+ String eno=request.getParameter("txtEno"); 
+ String name=request.getParameter("txtName"); 
+ String age = request.getParameter("txtAge"); 
+ String sal = request.getParameter("txtSal"); 
+ try{ 
+ Class.forName("com.mysql.jdbc.Driver"); 
+ Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/empdb"); 
+ PreparedStatement stmt = con.prepareStatement("select * from emp where empid=?"); 
+ stmt.setString(1, eno); 
+ ResultSet rs = stmt.executeQuery(); 
+ if(rs.next()){ 
+ out.println("<h1>~~~ Employee "+name+" Exist ~~~ </h1>"); 
+ PreparedStatement pst1= con.prepareStatement("update emp set salary=? where empid=?"); 
+ PreparedStatement pst2= con.prepareStatement("update emp set age=? where empid=?"); 
+ pst1.setString(1, sal); pst1.setString(2, eno); 
+ pst2.setString(1, age); pst2.setString(2, eno); 
+ pst1.executeUpdate(); pst2.executeUpdate(); 
+ } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 30 
+ else{ 
+ out.println("<h1>Employee Record not exist !!!!!</h1>"); 
+ } 
+ }catch(Exception e){out.println(e);} 
+ %></body></html> 
+5b. Create a JSP page to demonstrate the use of Expression language. 
+<< any example to demonstrate the use of EL like calculator or any formulas etc…. >> 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 31 
+5c. Create a JSP application to demonstrate the use of JSTL. 
+Basic insert, update and delete example using core and sql tag libraries in JSTL.
+CREATEDATABASEIF NOTEXISTS sampleDB;
+CREATETABLE`product` (
+ `id` int(10) unsigned NOTNULLauto_increment,
+ `pname` varchar(45) NOTNULL,
+ `quantity` int(10) unsigned NOTNULL,
+ PRIMARYKEY (`id`)
+);
+ 
+INSERTINTO`product` (`id`,`pname`,`quantity`) VALUES
+(1,'Mouse',50),
+(2,'Keyboard',5),
+(3,'Monitor',34);
+1. index.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+ <head>
+ <metahttp-equiv="Content-Type"content="text/html; charset=UTF-8">
+ <title>JSP Page</title>
+ </head>
+ <body>
+ <h1>Choose Option</h1>
+ <ahref="insert.jsp">Insert Record</a><p></p>
+ <ahref="display.jsp">Display Record</a>
+ </body>
+</html>
+2. insert.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html>
+<html>
+ <head>
+ <metahttp-equiv="Content-Type"content="text/html; charset=UTF-8">
+ <title>JSP Page</title>
+ </head>
+ <body>
+ <formaction="insertdb.jsp"method="post">
+ <tableborder="0"cellspacing="2"cellpadding="5">
+ <thead>
+ <tr>
+ <thcolspan="2">Purchase Product</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><label>Product Name</label></td>
+<td><inputtype="text"name="pname"/></td>
+ </tr>
+<tr>
+ <td><label>Quantity</label></td>
+<td><inputtype="text"name="qty"/></td>
+ </tr>
+<tr>
+ <td><inputtype="submit"value="Save"/></td>
+<td><inputtype="reset"value="reset"/></td>
+ </tr>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 32 
+ </tbody>
+ </table>
+ </form>
+ <fontcolor="red"><c:iftest="${not empty param.errMsg}">
+ <c:outvalue="${param.errMsg}"/>
+ <ahref="index.jsp">Go Back</a>
+ </c:if></font>
+ <fontcolor="green"><c:iftest="${not empty param.susMsg}">
+ <c:outvalue="${param.susMsg}"/>
+ <ahref="index.jsp">Go Back</a>
+ </c:if></font>
+ 
+ </body>
+</html>
+3. insertdb.jsp
+<%@ page import="java.io.*,java.util.*,java.sql.*"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql"%>
+ 
+<html>
+ <head>
+ <title>JINSERT Operation</title>
+ </head>
+ <body>
+ <c:iftest="${ empty param.pname or empty param.qty}">
+ <c:redirecturl="insert.jsp">
+ <c:paramname="errMsg"value="Please Enter Product and Quantity"/>
+ </c:redirect>
+ 
+ </c:if>
+ <sql:setDataSourcevar="dbsource"driver="com.mysql.jdbc.Driver"
+ url="jdbc:mysql://localhost/sampleDB"
+user="root" password="pass"/>
+ 
+ 
+ <sql:updatedataSource="${dbsource}"var="result">
+ INSERT INTO product(pname, quantity) VALUES (?,?);
+ <sql:paramvalue="${param.pname}"/>
+ <sql:paramvalue="${param.qty}"/>
+ </sql:update>
+ <c:iftest="${result>=1}">
+ <fontsize="5"color='green'> Congratulations ! Data inserted
+ successfully.</font>
+ 
+ <c:redirecturl="insert.jsp">
+ <c:paramname="susMsg"value="Congratulations ! Data inserted
+ successfully." />
+ </c:redirect>
+ </c:if>
+ 
+ 
+ </body>
+</html>
+4. display.jsp
+<%@ page import="java.io.*,java.util.*,java.sql.*"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql"%>
+ 
+<html>
+ <head>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 33 
+ <title>SELECT Operation</title>
+ <script>
+ function confirmGo(m,u) {
+ if ( confirm(m) ) {
+ window.location = u;
+ }
+ }
+ </script>
+ </head>
+ <body>
+ 
+ <sql:setDataSourcevar="dbsource"driver="com.mysql.jdbc.Driver"
+ url="jdbc:mysql://localhost/sampleDB"
+user="root" password="pass"/>
+ 
+ <sql:querydataSource="${dbsource}"var="result">
+ SELECT * from product;
+ </sql:query>
+ <center>
+ <form>
+ <tableborder="1"width="40%">
+ <caption>Product List</caption>
+ <tr>
+ <th>Product ID</th>
+<th>Product Name</th>
+<th>Quantity</th>
+<thcolspan="2">Action</th>
+ </tr>
+ <c:forEachvar="row"items="${result.rows}">
+ <tr>
+ <td><c:outvalue="${row.id}"/></td>
+<td><c:outvalue="${row.pname}"/></td>
+<td><c:outvalue="${row.quantity}"/></td>
+<td><ahref="update.jsp?id=<c:out 
+value="${row.id}"/>">Update</a></td>
+ <td><ahref="javascript:confirmGo('Sure to delete this 
+record?','deletedb.jsp?id=<c:out value="${row.id}"/>')">Delete</a></td>
+ 
+ </tr>
+ </c:forEach>
+ </table>
+ </form>
+ <ahref="index.jsp">Go Home</a>
+ </center>
+</body>
+</html>
+5. update.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.io.*,java.util.*,java.sql.*"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql"%>
+<!DOCTYPE html>
+<html>
+ <head>
+ <metahttp-equiv="Content-Type"content="text/html; charset=UTF-8">
+ <title>JSP Page</title>
+ </head>
+ <body>
+ 
+ <sql:setDataSourcevar="dbsource"driver="com.mysql.jdbc.Driver"
+ url="jdbc:mysql://localhost/sampleDB"
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 34 
+ user="root" password="pass"/>
+ 
+ <sql:querydataSource="${dbsource}"var="result">
+ SELECT * from product where id=?;
+ <sql:paramvalue="${param.id}"/>
+ </sql:query>
+ <formaction="updatedb.jsp"method="post">
+ <tableborder="0"width="40%">
+ <caption>Update Product</caption>
+ <tr>
+ <th>Product Name</th>
+<th>Quantity</th>
+ </tr>
+ <c:forEachvar="row"items="${result.rows}">
+ <tr>
+ <td><inputtype="hidden"value="${param.id}"name="id"/>
+ <inputtype="text"value="${row.pname}"name="pname"/></td>
+ <td><inputtype="text"value="${row.quantity}"name="qty"/></td>
+ <td><inputtype="submit"value="Update"/></td>
+ </tr>
+ </c:forEach>
+ </table>
+ <ahref="index.jsp">Go Home</a>
+ </form>
+ </body>
+</html>
+6. updatedb.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.io.*,java.util.*,java.sql.*"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql"%>
+<!DOCTYPE html>
+<html>
+ <head>
+ <metahttp-equiv="Content-Type"content="text/html; charset=UTF-8">
+ <title>JSP Page</title>
+ </head>
+ <body>
+ <sql:setDataSourcevar="dbsource"driver="com.mysql.jdbc.Driver"
+ url="jdbc:mysql://localhost/sampleDB"
+user="root" password="pass"/>
+ <sql:updatedataSource="${dbsource}"var="count">
+ UPDATE product SET pname = ?, quantity=?
+ WHERE id='${param.id}'
+ <sql:paramvalue="${param.pname}"/>
+ <sql:paramvalue="${param.qty}"/>
+ </sql:update>
+ <c:iftest="${count>=1}">
+ <fontsize="5"color='green'> Congratulations ! Data updated
+ successfully.</font>
+ <ahref="index.jsp">Go Home</a> 
+ </c:if>
+ </body>
+</html>
+7. deletedb.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.io.*,java.util.*,java.sql.*"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql"%>
+<!DOCTYPE html>
+<html>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 35 
+ <head>
+ <metahttp-equiv="Content-Type"content="text/html; charset=UTF-8">
+ <title>JSP Page</title>
+ </head>
+ <body>
+ <sql:setDataSourcevar="dbsource"driver="com.mysql.jdbc.Driver"
+ url="jdbc:mysql://localhost/sampleDB"
+user="root" password="pass"/>
+ <sql:updatedataSource="${dbsource}"var="count">
+ DELETE FROM product
+ WHERE id='${param.id}'
+ </sql:update>
+ <c:iftest="${count>=1}">
+ <fontsize="5"color='green'> Congratulations ! Data deleted
+ successfully.</font>
+ <ahref="index.jsp">Go Home</a> 
+ </c:if>
+ </body>
+</html>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 36 
+6a. Create a Currency Converter application using EJB. 
+------------------- index.html ------------------------------------
+<html><head><title>Currency Converter</title></head> 
+<body> 
+<form action="CCServlet" > 
+ Enter Amount <input type="text" name="amt"><br> 
+ Select Conversion Type 
+<input type="radio" name="type" value="r2d" checked>Rupees to Dollar 
+<input type="radio" name="type" value="d2r" >Dollor to Rupees<br> 
+<input type="reset" ><input type="submit" value="CONVERT" > 
+</form> 
+</body> 
+</html> 
+-------------------------------- CCServlet.java -------------------------- 
+package mypack; 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+import javax.ejb.EJB; 
+import mybeans.CCBean; 
+public class CCServlet extends HttpServlet { 
+ @EJB CCBean obj; 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+PrintWriter out = response.getWriter(); 
+double amt = Double.parseDouble(request.getParameter("amt")); 
+if(request.getParameter("type").equals("r2d")) 
+{ 
+out.println("<h1>"+amt+ " Rupees = "+obj.r2Dollor(amt)+" Dollors</h1>"); 
+} 
+if(request.getParameter("type").equals("d2r")) 
+{ 
+out.println("<h1>"+amt+ " Dollors = "+obj.d2Rupees(amt)+" Rupees</h1>"); 
+} 
+}} 
+------------------------- CCBean ---------------------------- 
+Create a stateless session bean 
+----------------------------------------------------------------- 
+package mybeans; 
+import javax.ejb.Stateless; 
+@Stateless 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 37 
+public class CCBean { 
+public CCBean(){} 
+public double r2Dollor(double r){ return r/65.65; } 
+public double d2Rupees(double d){ return d*65.65; } 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 38 
+6b. Develop a Simple Room Reservation System Application Using EJB. 
+Create table rookbook(RoomId varchar(4) PRIMARY KEY, RoomType varchar(20), charges 
+number(5,2), cust varchar(20), mob varchar(20) , status varchar(10)) 
+insert into roombook values('1001','Delux',5000.00,'','','Not Booked') 
+insert into roombook values('1002','Super Delux',7000.00,'','','Not Booked') 
+insert into roombook values('1003','Suit',9500.00,'','','Not Booked') 
+insert into roombook values('2001','Delux',5000.00,'','','Not Booked') 
+insert into roombook values('2002','Super Delux',7000.00,'','','Not Booked') 
+insert into roombook values('2003','Suit',9500.00,'','','Not Booked') 
+-------------------------------------RoomBook.html ------------------------------------ 
+<form action="RBServlet" > 
+ Select a room Type 
+<input type="radio" name="txtType" value="Delux">Delux 
+<input type="radio" name="txtType" value="Super Delux">Super Delux 
+<input type="radio" name="txtType" value="Suit">Suit<br> 
+ Enter Your Name<input type="text" name="txtCust" ><br> 
+ Enter Mobile No.<input type="text" name="txtMob" ><br> 
+<input type="reset" ><input type="submit" value="Book Room"> 
+</form> 
+------------------------------------------RBServlet-------------------------------------- 
+package mypack; 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+import javax.ejb.EJB; 
+import mybeans.RRBean; 
+public class RBServlet extends HttpServlet { 
+@EJB RRBean obj; 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+throws ServletException, IOException{ 
+PrintWriter out=response.getWriter(); 
+String rt=request.getParameter("txtType"); 
+String cn=request.getParameter("txtCust"); 
+String cm=request.getParameter("txtMob"); 
+String msg = obj.roomBook(rt, cn, cm); 
+ out.println(msg); 
+}} 
+-------------------------------------------RRBean.java ---------------------------------- 
+package mybeans; 
+import javax.ejb.Stateless; 
+import java.sql.*; 
+@Stateless 
+public class RRBean { 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 39 
+public RRBean(){} 
+public String roomBook(String rt, String cn, String cm){ 
+String msg=""; 
+try{ 
+Class.forName("com.mysql.jdbc.Driver"); 
+Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/rrdb","root","root"); 
+String query="select * from roombook where RoomType=? and status='Not Booked'"; 
+PreparedStatement pst = con.prepareStatement(query); 
+pst.setString(1,rt); 
+ResultSet rs= pst.executeQuery(); 
+if(rs.next()){ 
+ String rno=rs.getString(1); 
+PreparedStatement stm1 = con.prepareStatement("update roombook set cust=? where RoomId=? "); 
+PreparedStatement stm2 = con.prepareStatement("update roombook set mobile=? where RoomId=? "); 
+PreparedStatement stm3 = con.prepareStatement("update roombook set status=? where RoomId=? "); 
+stm1.setString(1,cn); stm1.setString(2,rno); 
+stm2.setString(1,cm); stm2.setString(2,rno); 
+stm3.setString(1, "Booked"); stm3.setString(2,rno); 
+stm1.executeUpdate(); 
+stm2.executeUpdate(); 
+stm3.executeUpdate(); 
+msg = "Room "+rno+ " Booked <br> Charges = "+rs.getString(3); 
+} 
+else 
+{ 
+msg = "Room "+rt+ " currently Not available"; 
+} 
+}catch(Exception e){msg=""+e;} 
+return msg;}} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 40 
+6c. Develop simple shopping cart application using EJB [Stateful Session Bean]. 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 41 
+CartBeanLocal.java 
+package cart; 
+import java.util.List; 
+import javax.ejb.Local; 
+@Local 
+public interface CartBeanLocal { 
+ public void initialize(String person) throws Exception; 
+ public void initialize(String person, String id) 
+ throws Exception; 
+ public void addBook(String title); 
+ public void removeBook(String title) throws Exception; 
+ public List<String> getContents(); 
+ public void remove(); 
+} 
+CartBean.java 
+~~~~~~~~~~~~ 
+package cart; 
+import java.util.ArrayList; 
+import java.util.List; 
+import javax.ejb.Remove; 
+import javax.ejb.Stateful; 
+@Stateful 
+public class CartBean implements CartBeanLocal { 
+ String customerName; 
+ String customerId; 
+ List<String> contents; 
+ public void initialize(String person, String id) 
+ throws Exception { 
+ if (person == null) { 
+ throw new Exception("Null person not allowed."); 
+ } else { 
+ customerName = person; 
+ } 
+ if ( person=="ABC" && id=="123") { 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 42 
+ customerId = id; 
+ } else { 
+ throw new Exception("Invalid id: " + id); 
+ } 
+ contents = new ArrayList<String>(); 
+ } 
+ public void addBook(String title) { 
+ contents.add(title); 
+ } 
+ public void removeBook(String title) throws Exception { 
+ boolean result = contents.remove(title); 
+ if (result == false) { 
+ throw new Exception(title + " not in cart."); 
+ } 
+ } 
+ public List<String> getContents() { 
+ return contents; 
+ } 
+ @Remove 
+ public void remove() { 
+ contents = null; 
+ } 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 43 
+package testcart; 
+import cart.CartBeanLocal; 
+import java.io.*; 
+import java.util.*; 
+import java.util.logging.Level; 
+import java.util.logging.Logger; 
+import javax.naming.*; 
+import javax.servlet.*; 
+import javax.servlet.annotation.WebServlet; 
+import javax.servlet.http.*; 
+@WebServlet(name = "CartTestServlet", urlPatterns = {"/CartTestServlet"}) 
+public class CartTestServlet extends HttpServlet { 
+ CartBeanLocal cartBean = lookupCartBeanLocal(); 
+ @Override 
+ protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+ throws ServletException, IOException { 
+ response.setContentType("text/html;charset=UTF-8"); 
+ try{ 
+ cartBean.initialize("ABC", "123"); 
+ }catch(Exception e){} 
+ cartBean.addBook("Java 8 Cookbook"); 
+ cartBean.addBook("Enterprise Java 7 "); 
+ cartBean.addBook("Java for Dummies"); 
+ cartBean.addBook("Learn Java 8"); 
+ try (PrintWriter out = response.getWriter()) { 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 44 
+ try{ 
+ List<String> books = cartBean.getContents(); 
+ for( String s : books) 
+ out.println(s +"<br />"); 
+ }catch(Exception e){} 
+ } 
+ } 
+ private CartBeanLocal lookupCartBeanLocal() { 
+ try { 
+ Context c = new InitialContext(); 
+ return (CartBeanLocal) c.lookup("java:global/EnterpriseApplication1/EnterpriseApplication1-
+ejb/CartBean!cart.CartBeanLocal"); 
+ } catch (NamingException ne) { 
+ Logger.getLogger(getClass().getName()).log(Level.SEVERE, "exception caught", ne); 
+ throw new RuntimeException(ne); 
+ } 
+ } 
+} 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 45 
+7a. Develop simple EJB application to demonstrate Servlet Hit count using Singleton Session Beans. 
+Organization of file in Project Folder 
+----------------------- CounterBean.java ------------------------------------ 
+package counter.ejb; 
+import javax.ejb.Singleton; 
+@Singleton 
+public class CounterBean { 
+ private int hits = 1; 
+ // Increment and return the number of hits 
+ public int getHits() { 
+ return hits++; 
+ } 
+} 
+------------------------------------ Count.java ------------------------------------ 
+package mypack; 
+import java.io.Serializable; 
+import javax.ejb.EJB; 
+import javax.enterprise.context.ConversationScoped; 
+import javax.inject.Named; 
+import counter.ejb.CounterBean; 
+@Named("count") 
+@ConversationScoped 
+public class Count implements Serializable { 
+ @EJB 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 46 
+ private CounterBean counterBean; 
+ private int hitCount; 
+ public Count() { 
+ this.hitCount = 0; 
+ } 
+ public int getHitCount() { 
+ hitCount = counterBean.getHits(); 
+ return hitCount; 
+ } 
+ public void setHitCount(int newHits) { 
+ this.hitCount = newHits; 
+ } 
+} 
+--------------------------------------------- HitCountPage.xhtml ----------------------- 
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" 
+ xmlns:h="http://xmlns.jcp.org/jsf/html"> 
+<h:head> 
+<title>Page Hit Counter Using Singleton Session Bean ~~~~ </title> 
+</h:head> 
+<h:body> 
+<h1>Welcome to Hit Count Page</h1> 
+ Page was hit #{count.hitCount} times 
+</h:body> 
+</html> 
+Run this file to get the output 
+7b. Develop simple visitor Statistics application using Message Driven Bean [Stateless Session Bean].
+7c. Develop simple Marks Entry Application to demonstrate accessing Database using EJB. 
+<Any application to the best of Teachers assumption > 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 47 
+8a. Develop a simple Inventory Application Using JPA.
+8b. Develop a Guestbook Application Using JPA. 
+JPA Practical using GuestBook 
+Steps: 
+1. Create Web Application with dedicated folder for Library 
+2. Add Simple java class or Persitent Entity class from Database (code below GuestBook.java) 
+3. Add SQL Connector Jar file to Library 
+4. Create Persistence Unit using jdbc connection to MySQL database 
+5. Create the JSP files (codes given below) 
+6. Run the Application. 
+GuestBook.java 
+~~~~~~~~~~~~~ 
+package asif; 
+import javax.persistence.*; 
+@Entity 
+@Table(name="GuestBook") 
+public class GuestBook { 
+ @Id 
+ @GeneratedValue(strategy = GenerationType.IDENTITY) 
+ @Column(name="VisitorNo", unique=true, updatable=false) 
+ private Integer visitorNo; 
+ @Column(name="VisitorName") 
+ private String visitorName; 
+ @Column(name="Message") 
+ private String message; 
+ @Column(name="MessageDate") 
+ private String messageDate; 
+ public GuestBook() { 
+ } 
+ public Integer getVisitorNo() { 
+ return visitorNo; 
+ } 
+ public void setVisitorNo(Integer visitorNo) { 
+ this.visitorNo = visitorNo; 
+ } 
+ public String getVisitorName() { 
+ return visitorName; 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 48 
+ } 
+ public void setVisitorName(String visitorName) { 
+ this.visitorName = visitorName; 
+ } 
+ public String getMessage() { 
+ return message; 
+ } 
+ public void setMessage(String message) { 
+ this.message = message; 
+ } 
+ public String getMessageDate() { 
+ return messageDate; 
+ } 
+ public void setMessageDate(String messageDate) { 
+ this.messageDate = messageDate; 
+ } 
+} 
+index.jsp 
+~~~~~~~~~~ 
+<%@page contentType="text/html" pageEncoding="UTF-8"%> 
+<!DOCTYPE html> 
+<html> 
+ <body style="background-color: pink;"> 
+ Sign the Guest Book 
+ <form action="GuestBookView.jsp" method="post"> 
+ Visitor Name: <input name="guest" maxlength="25" size="50" /> 
+ Message: <textarea rows="5" cols="36" name="message"></textarea> 
+ <input type="submit" name="btnSubmit" value="Submit" /> 
+ </form> 
+ </body> 
+</html> 
+GuestBookView.jsp 
+~~~~~~~~~~~~~~~~~ 
+<%@page import="java.util.*,javax.persistence.*,asif.GuestBook" %> 
+<%@page contentType="text/html" pageEncoding="UTF-8"%> 
+<!DOCTYPE html> 
+<%! 
+ private EntityManagerFactory entityManagerFactory; 
+ private EntityManager entityManager; 
+ private EntityTransaction entityTransaction; 
+ List<GuestBook> guestbook; 
+%> 
+<% 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 49 
+ entityManagerFactory = Persistence.createEntityManagerFactory("JPAApplication1PU"); 
+ entityManager = entityManagerFactory.createEntityManager(); 
+ String submit = request.getParameter("btnSubmit"); 
+ if(submit != null && ("Submit").equals(submit)) { 
+ try { 
+ String guest = request.getParameter("guest"); 
+ String message = request.getParameter("message"); 
+ String messageDate = new java.util.Date().toString(); 
+ GuestBook gb = new GuestBook(); 
+ gb.setVisitorName(guest); 
+ gb.setMessage(message); 
+ gb.setMessageDate(messageDate); 
+ entityTransaction = entityManager.getTransaction(); 
+ entityTransaction.begin(); 
+ entityManager.persist(gb); 
+ entityTransaction.commit(); 
+ } catch (RuntimeException e) { 
+ if(entityTransaction != null) entityTransaction.rollback(); 
+ throw e; 
+ } 
+ response.sendRedirect("GuestBookView.jsp"); 
+ } 
+ try { 
+ guestbook = entityManager.createQuery("SELECT g from GuestBook g").getResultList(); 
+ } catch (RuntimeException e) { } 
+ entityManager.close(); 
+%> 
+<html> 
+ <body> 
+ View the Guest Book <b>Click <a href="index.jsp"> here</a> to sign the guestbook.</b> 
+ 
+ <hr /> 
+ <% 
+ Iterator iterator = guestbook.iterator(); 
+ while (iterator.hasNext()) { 
+ GuestBook obj = (GuestBook) iterator.next(); 
+ %> 
+ On <%= obj.getMessageDate() %>,<br /> 
+ <b><%= obj.getVisitorName() %>:</b> 
+ <%= obj.getMessage() %> 
+ <br /><br /> 
+ <% 
+ } 
+ %> 
+ 
+ </body> 
+</html> 
+8c. Create simple JPA application to store and retrieve Book details.<< similar to above example >>
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 50 
+9a. Develop a JPA Application to demonstrate use of ORM associations.
+9b. Develop a Hibernate application to store Feedback of Website Visitor in MySQL Database. 
+create database feedbackdb; 
+create table GuestBook( 
+vno int PRIMARY KEY AUTO_INCREMENT, 
+vname varchar(50), 
+msg varchar(100), 
+mdate varchar(50) 
+) 
+------------------------------- GuestBookBean.java ---------------------------------------------- 
+package mypack; 
+import javax.persistence.*; 
+@Entity 
+@Table(name="guestbook") 
+public class GuestBookBean implements java.io.Serializable { 
+ @Id 
+ @GeneratedValue 
+ @Column(name="vno") 
+ private Integer visitorNo; 
+ @Column(name="vname") 
+ private String visitorName; 
+ @Column(name="msg") 
+ private String msg; 
+ @Column(name="mdate") 
+ private String msgDate; 
+ public GuestBookBean() { } 
+ public Integer getVisitorNo() { return visitorNo; } 
+ public String getVisitorName() { return visitorName; } 
+ public String getMsg() { return msg; } 
+ public String getMsgDate() { return msgDate; } 
+ public void setVisitorNo(Integer vn) { visitorNo = vn ; } 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 51 
+ public void setVisitorName(String vn) { visitorName = vn; } 
+ public void setMsg(String m) { msg = m; } 
+ public void setMsgDate(String md) { msgDate=md; } 
+} 
+Source packages → new → others→ select category Hibernate → Hibernate Configuration Wizard 
+<hibernate-configuration> 
+<session-factory> 
+<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property> 
+<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property> 
+<property 
+name="hibernate.connection.url">jdbc:mysql://localhost:3306/feedbackdb?zeroDateTimeBehavior=co
+nvertToNull</property> 
+<property name="hibernate.connection.username">root</property> 
+<property name="hibernate.connection.password">root</property> 
+<mapping class="mypack.GuestBookBean" /> 
+</session-factory> 
+</hibernate-configuration> 
+-------------------------------- index.html---------------------------------------------------- 
+<h1>Website Feedback Form for google.con </h1> 
+<form action="fb.jsp" > 
+munotes.in
+T. Y. B. Sc. Information Technology 2018
+USIT5P6 - Enterprise Java Practical Teacher’s Reference Manual Page 52 
+ Enter Your Name: <input type="text" name="name" ><br> 
+ Enter Your Message : <textarea rows="10" cols="50" name="message" ></textarea><br> 
+<input type="submit" value="Submit My FeedBack " > 
+</form> 
+-------------------------------- fb.jsp---------------------------------------------------- 
+<%@page import="org.hibernate.*, org.hibernate.cfg.*, mypack.*" %> 
+<%! SessionFactory sf; 
+org.hibernate.Session hibSession; 
+%> 
+<% 
+sf = new Configuration().configure().buildSessionFactory(); 
+hibSession = sf.openSession(); 
+Transaction tx = null; 
+GuestBookBean gb = new GuestBookBean(); 
+try{ 
+tx = hibSession.beginTransaction(); 
+String username = request.getParameter("name"); 
+String usermsg = request.getParameter("message"); 
+String nowtime = ""+new java.util.Date(); 
+gb.setVisitorName(username); 
+gb.setMsg(usermsg); 
+gb.setMsgDate(nowtime); 
+hibSession.save(gb); 
+tx.commit(); 
+out.println("Thank You for your valuable feedback...."); 
+}catch(Exception e){out.println(e);} 
+hibSession.close(); 
+%> 
+9c.Develop a Hibernate application to store and retrieve employee details in MySQL Database. 
+<<Similar to above appication>> 
+10a. Develop an application to demonstrate Hibernate One- To -One Mapping Using Annotation. 
+10b. Develop Hibernate application to enter and retrieve course details with ORM Mapping. 
+10c. Develop a five page web application site using any two or three Java EE Technologies. 
+<<Any application to the best of teachers own assumption >> 
+Dear Teacher, your valuable feedback and contribution is welcome to make this manual more 
+effective on dandhiren@yahoo.co.in and/or shaikh.aa@rediffmail.com
+munotes.in
